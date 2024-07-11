@@ -27,15 +27,26 @@ typedef struct {
     SocialAccount accounts[MAX_ACCOUNTS];
 } Contact;
 
-void print_list(Contact contacts[MAX_CONTACTS]);
 int add_contact(Contact contacts[MAX_CONTACTS]);
-int del_contact();
-int edit_contact();
+int del_contact(Contact contacts[MAX_CONTACTS]);
+int edit_contact(Contact contacts[MAX_CONTACTS]);
+
+void clear_contact(Contact *contact);
+
 void input_person(Person *new_person);
 void input_phones(char phones[MAX_PHONES][MAX_SYMBOLS]);
 void input_emails(char phones[MAX_EMAILS][MAX_SYMBOLS]);
 void input_account(SocialAccount account[MAX_ACCOUNTS]);
-int get_count_contacts(Contact contacts[MAX_CONTACTS]);
+
 void input_nullable_string(char str[MAX_SYMBOLS]);
+void input_string(char str[MAX_SYMBOLS]);
+
+int get_count_contacts(Contact contacts[MAX_CONTACTS]);
+int get_person_index(Contact contacts[MAX_CONTACTS], int count_contacts, Person *person);
+
+void print_list(Contact contacts[MAX_CONTACTS]);
+void print_phones(Contact *contact);
+void print_emails(Contact *contact);
+void print_accounts(Contact *contact);
 
 #endif

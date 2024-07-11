@@ -33,7 +33,7 @@ void menu() {
             }
             case 3: {
                 system("clear");
-                if (del_contact() != 0) {
+                if (del_contact(contacts) != 0) {
                     system("clear");
                     printf("Ошибка удаления!\n");
                 }
@@ -41,7 +41,7 @@ void menu() {
             }
             case 4: {
                 system("clear");
-                if (edit_contact() != 0) {
+                if (edit_contact(contacts) != 0) {
                     system("clear");
                     printf("Ошибка редактирования!\n");
                 }
