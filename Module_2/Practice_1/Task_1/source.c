@@ -13,13 +13,13 @@ void print_list(Contact contacts[MAX_CONTACTS]) {
     }
     printf("Список контактов:\n");
     for (int i = 0; i < count; i++) {
-        printf("%d. %s %s %s, работа: ", i + 1, contacts[i].person.last_name, contacts[i].person.first_name, contacts[i].person.mid_name);
-        printf("%s %s тел.: ", contacts[i].job_title, contacts[i].job_place);
-        print_phones(&contacts[i]);
-        printf("почта: ");
-        print_emails(&contacts[i]);
-        printf("соцсети: ");
-        print_accounts(&contacts[i]);
+        printf("%d. %s %s %s | работа: ", i + 1, contacts[i].person.last_name, contacts[i].person.first_name, contacts[i].person.mid_name);
+        printf("%s %s | тел.: ", contacts[i].job_title, contacts[i].job_place);
+        print_phones(contacts[i].phones);
+        printf("| почта: ");
+        print_emails(contacts[i].emails);
+        printf("| соцсети: ");
+        print_accounts(contacts[i].accounts);
         printf("\n");
     }
 };
@@ -101,8 +101,77 @@ int edit_contact(Contact contacts[MAX_CONTACTS]) {
                 break;
             }
             case 6: {
-                printf("Выберите телефон для редактирования:\n");
-
+                int phones_count = print_phones(contacts[person_index].phones);
+                if (phones_count == 0) {
+                    printf("Номеров нет, добавьте новый: ");
+                    input_string(contacts[person_index].phones[0]);
+                } else {
+                    if (phones_count <= MAX_PHONES) {
+                        printf("\nВыберите телефон для редактирования (%d - ввести новый): ", phones_count);
+                    } else {
+                        printf("\nВыберите телефон для редактирования: ");
+                    }
+                    int c;
+                    scanf("%d", &c);
+                    if (c >= 1 && c <= phones_count && c <= MAX_PHONES) {
+                        printf("Введите новый номер телефона: ");
+                        input_string(contacts[person_index].phones[c - 1]);
+                        contacts[person_index].phones[phones_count][0] = '\0';
+                    } else {
+                        printf("Введен неверный номер!\n");
+                    }
+                }
+                break;
+            }
+            case 7: {
+                int emails_count = print_emails(contacts[person_index].emails);
+                if (emails_count == 0) {
+                    printf("Адресов нет, добавьте новый: ");
+                    input_string(contacts[person_index].emails[0]);
+                } else {
+                    if (emails_count <= MAX_EMAILS) {
+                        printf("\nВыберите адрес для редактирования (%d - ввести новый): ", emails_count);
+                    } else {
+                        printf("\nВыберите адрес для редактирования: ");
+                    }
+                    int c;
+                    scanf("%d", &c);
+                    if (c >= 1 && c <= emails_count && c <= MAX_EMAILS) {
+                        printf("Введите новый адрес почты: ");
+                        input_string(contacts[person_index].emails[c - 1]);
+                        contacts[person_index].emails[emails_count][0] = '\0';
+                    } else {
+                        printf("Введен неверный номер!\n");
+                    }
+                }
+                break;
+            }
+            case 8: {
+                int accounts_count = print_accounts(contacts[person_index].accounts);
+                if (accounts_count == 0) {
+                    printf("Профилей нет, создайте первый.\nВведите название соцсети: ");
+                    input_string(contacts[person_index].accounts[0].name);
+                    printf("Введите ссылку на профиль: ");
+                    input_string(contacts[person_index].accounts[0].link);
+                } else {
+                    if (accounts_count <= MAX_ACCOUNTS) {
+                        printf("\nВыберите профиль для редактирования (%d - создать новый): ", accounts_count);
+                    } else {
+                        printf("\nВыберите профиль для редактирования: ");
+                    }
+                    int c;
+                    scanf("%d", &c);
+                    if (c >= 1 && c <= accounts_count && c <= MAX_ACCOUNTS) {
+                        printf("Введите название соцсети: ");
+                        input_string(contacts[person_index].accounts[c - 1].name);
+                        printf("Введите ссылку на профиль: ");
+                        input_string(contacts[person_index].accounts[c - 1].link);
+                        contacts[person_index].accounts[accounts_count].name[0] = '\0';
+                        contacts[person_index].accounts[accounts_count].link[0] = '\0';
+                    } else {
+                        printf("Введен неверный номер!\n");
+                    }
+                }
                 break;
             }
             case 0:
@@ -148,7 +217,7 @@ void input_account(SocialAccount accounts[MAX_ACCOUNTS]) {
     while (i < MAX_ACCOUNTS) {
         char input_continue;
         printf("Добавить %d-й аккаунт соцсети? [y/n] ", i + 1);
-        scanf("%c", &input_continue);
+        scanf(" %c", &input_continue);
         if (input_continue != 'y') {
             accounts[i].name[0] = '\0';
             break;
@@ -227,20 +296,29 @@ void clear_contact(Contact *contact) {
     }
 }
 
-void print_phones(Contact *contact) {
-    for (int j = 0; j < MAX_PHONES && contact->phones[j][0] != '\0'; j++) {
-        printf("%d) %s, ", j + 1, contact->phones[j]);
+int print_phones(char phones[MAX_PHONES][MAX_SYMBOLS]) {
+    int j;
+    if (phones[0][0] == '\0') return 0;
+    for (j = 0; j < MAX_PHONES && phones[j][0] != '\0'; j++) {
+        printf("%d) %s. ", j + 1, phones[j]);
     }
+    return j + 1;
 }
 
-void print_emails(Contact *contact) {
-    for (int j = 0; j < MAX_EMAILS && contact->emails[j][0] != '\0'; j++) {
-        printf("%d) %s, ", j + 1, contact->emails[j]);
+int print_emails(char emails[MAX_EMAILS][MAX_SYMBOLS]) {
+    int j;
+    if (emails[0][0] == '\0') return 0;
+    for (j = 0; j < MAX_EMAILS && emails[j][0] != '\0'; j++) {
+        printf("%d) %s. ", j + 1, emails[j]);
     }
+    return j + 1;
 }
 
-void print_accounts(Contact *contact) {
-    for (int j = 0; j < MAX_ACCOUNTS && contact->accounts[j].name[0] != '\0'; j++) {
-        printf("%d) %s - %s, ", j + 1, contact->accounts[j].name, contact->accounts[j].link);
+int print_accounts(SocialAccount accounts[MAX_ACCOUNTS]) {
+    int j;
+    if (accounts[0].name[0] == '\0') return 0;
+    for (j = 0; j < MAX_ACCOUNTS && accounts[j].name[0] != '\0'; j++) {
+        printf("%d) %s - %s. ", j + 1, accounts[j].name, accounts[j].link);
     }
+    return j + 1;
 }

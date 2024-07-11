@@ -45,8 +45,8 @@ int get_count_contacts(Contact contacts[MAX_CONTACTS]);
 int get_person_index(Contact contacts[MAX_CONTACTS], int count_contacts, Person *person);
 
 void print_list(Contact contacts[MAX_CONTACTS]);
-void print_phones(Contact *contact);
-void print_emails(Contact *contact);
-void print_accounts(Contact *contact);
+int print_phones(char phones[MAX_PHONES][MAX_SYMBOLS]);
+int print_emails(char emails[MAX_EMAILS][MAX_SYMBOLS]);
+int print_accounts(SocialAccount accounts[MAX_ACCOUNTS]);
 
 #endif
