@@ -1,3 +1,6 @@
 *.o
 program
 *.txt
+*.tar
+*.zip
+*.docx
