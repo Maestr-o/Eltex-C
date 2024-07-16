@@ -1,5 +1,14 @@
 #include "header.h"
 
+int MASK_ALL = 0b111111111;
+int MASK_USER = 0b111000000;
+int MASK_GROUP = 0b000111000;
+int MASK_OTHER = 0b000000111;
+
+int MASK_R = 0b100100100;
+int MASK_W = 0b010010010;
+int MASK_X = 0b001001001;
+
 void input_digit_permissions(int *bin) {
     char str[MAX_DIGITS];
     printf("Введите число (например: 766): ");
@@ -90,4 +99,65 @@ int bin_to_oct(int bin) {
     }
     s[3] = '\0';
     return atoi(s);
+}
+
+void change_rights(int *bin, char cmd[MAX_LETTERS]) {
+    int mask_left = 0, mask_right = 0;
+    int i = 0;
+    while (cmd[i] != '+' && cmd[i] != '-' && cmd[i] != '=' && cmd[i] != '\0') {
+        switch (cmd[i]) {
+            case 'a':
+                mask_left |= MASK_ALL;
+                break;
+            case 'u':
+                mask_left |= MASK_USER;
+                break;
+            case 'g':
+                mask_left |= MASK_GROUP;
+                break;
+            case 'o':
+                mask_left |= MASK_OTHER;
+                break;
+            default:
+                printf("Неизвестная группа пользователей\n");
+                break;
+        }
+        i++;
+    }
+    char oper = cmd[i++];
+    while (cmd[i] != '\0') {
+        switch (cmd[i]) {
+            case 'r':
+                mask_right |= MASK_R;
+                break;
+            case 'w':
+                mask_right |= MASK_W;
+                break;
+            case 'x':
+                mask_right |= MASK_X;
+                break;
+            default:
+                printf("Неизвестная операция\n");
+                break;
+        }
+        i++;
+    }
+    switch (oper) {
+        case '+': {
+            *bin |= (mask_left & mask_right);
+            break;
+        }
+        case '-': {
+            *bin &= ~(mask_left & mask_right);
+            break;
+        }
+        case '=': {
+            *bin &= ~mask_left;
+            *bin |= (mask_left & mask_right);
+            break;
+        }
+        default:
+            printf("Неизвестная операция\n");
+            break;
+    }
 }

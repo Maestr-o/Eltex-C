@@ -10,11 +10,12 @@
 #define MAX_LETTERS 10
 #define MAX_NAME 255
 
-void input_digit_permissions(int *permissions);
-void input_letter_permissions(int *permissions);
-int input_file(int *permissions);
-void output_bits(int permissions);
-void output_letters(int permissions);
-int bin_to_oct(int permissions);
+void input_digit_permissions(int *bin);
+void input_letter_permissions(int *bin);
+int input_file(int *bin);
+void output_bits(int bin);
+void output_letters(int bin);
+int bin_to_oct(int bin);
+void change_rights(int *bin, char cmd[MAX_LETTERS]);
 
 #endif

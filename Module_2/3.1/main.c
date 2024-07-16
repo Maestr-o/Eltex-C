@@ -42,4 +42,12 @@ void menu() {
         }
     }
     output_bits(bin);
+    
+    printf("Введите операцию изменения прав доступа (пример: go-x): ");
+    char op[MAX_LETTERS];
+    scanf("%s", op);
+    change_rights(&bin, op);
+    printf("Числовое: %d\n", bin_to_oct(bin));
+    output_letters(bin_to_oct(bin));
+    output_bits(bin);
 }
