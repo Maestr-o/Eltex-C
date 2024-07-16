@@ -15,21 +15,21 @@ void menu() {
     printf("Выберите действие:\n1. Ввести права доступа в буквенном обозначении\n2. Ввести права доступа в цифровом обозначении\n3. Выбрать файл\n");
     printf("----------------------------------------\n");
     scanf("%d", &c);
-    int permissions = 0;
+    int bin = 0;
     switch (c) {
         case 1: {
-            input_letter_permissions(&permissions);
+            input_letter_permissions(&bin);
             break;
         }
         case 2: {
-            input_digit_permissions(&permissions);
+            input_digit_permissions(&bin);
             break;
         }
         case 3: {
-            int num = input_file(&permissions);
+            int num = input_file(&bin);
             if (num != -1) {
                 printf("Числовое: %d\n", num);
-                output_letters(permissions);
+                output_letters(bin_to_oct(bin));
             } else {
                 printf("Ошибка!\n");
                 return;
@@ -41,5 +41,5 @@ void menu() {
             return;
         }
     }
-    output_bits(permissions);
+    output_bits(bin);
 }
