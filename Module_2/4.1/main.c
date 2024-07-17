@@ -41,10 +41,7 @@ void menu() {
                 printf("Введите номер контакта: ");
                 int n;
                 scanf("%d", &n);
-                // if (edit_contact(head, n) != 0) {
-                //     system("clear");
-                //     printf("Ошибка редактирования!\n");
-                // }
+                head = edit_contact(head, n - 1);
                 break;
             }
             default: {

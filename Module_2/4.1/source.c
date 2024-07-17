@@ -52,23 +52,80 @@ Item* add_contact(Item* head) {
     return insert(head, new_contact);
 };
 
-Item* del_contact(Item* head, int n) { // переделать
+Item* insert(Item* head, Contact contact) {
+    Item* item = malloc(sizeof(Item));
+    item->contact = contact;
+    if (head == NULL) {
+        return item;
+    }
+    Item* right = find_pointer(head, contact);
+    if (right == NULL) {
+        Item* last = head;
+        while (last->next != NULL) {
+            last = last->next;
+        }
+        last->next = item;
+        item->prev = last;
+    } else if (right->prev == NULL) {
+        item->next = right;
+        right->prev = item;
+        head = item;
+    } else {
+        Item* left = right->prev;
+        left->next = item;
+        item->prev = left;
+        item->next = right;
+        right->prev = item;
+    }
+    return head;
+}
+
+Item* find_pointer(Item* head, Contact contact) {
+    Item* p = head;
+    while (p != NULL) {
+        if (strcmp(p->contact.person.last_name, contact.person.last_name) >= 0) {
+            break;
+        }
+        p = p->next;
+    }
+    return p;
+}
+
+Item* del_contact(Item* head, int n) {
     int count_contacts = get_count_contacts(head);
     if (n < 0 || n >= count_contacts) {
         printf("Контакта с таким номером не существует\n");
         return head;
     }
-
     Item *p = head;
     for (int i = 0; i < n; i++) p = p->next;
-
-    Item* tmp = p;
-    p->prev = p->next;
-    p->next->prev = p->prev;
-    clear_contact(&tmp->contact);
-    free(tmp);
+    if (p->prev != NULL) {
+        p->prev->next = p->next;
+    } else {
+        head = p->next;
+    }
+    if (p->next != NULL) {
+        p->next->prev = p->prev;
+    }
+    clear_contact(&p->contact);
+    free(p);
     return head;
-};
+}
+
+Item* sort_contacts(Item* head) {
+    if (head == NULL || head->next == NULL) {
+        return head;
+    }
+    Item* sorted = NULL;
+    Item* current = head;
+    while (current != NULL) {
+        Item* next = current->next;
+        current->prev = current->next = NULL;
+        sorted = insert(sorted, current->contact);
+        current = next;
+    }
+    return sorted;
+}
 
 int get_person_index(Item* head, Person person) {
     int i = 0;
@@ -81,129 +138,129 @@ int get_person_index(Item* head, Person person) {
     return -1;
 };
 
-// int edit_contact(Item* head) { // переделать
-//     int count_contacts = get_count_contacts(head);
-//     Person person;
-//     input_person(&person);
-//     int person_index = get_person_index(head, &person);
-//     if (person_index >= 0) {
-//         system("clear");
-//         printf("Что вы хотите изменить?\n1. Фамилию\n2. Имя\n3. Отчество\n4. Место работы\n5. Должность\n6. Телефон\n7. Почту\n8. Профиль в соцсети\n0. Назад\n");
-//         int c;
-//         scanf(" %d", &c);
-//         system("clear");
-//         switch (c) {
-//             case 1: {
-//                 printf("Введите новую фамилию: ");
-//                 input_string(contacts[person_index].person.last_name);
-//                 break;
-//             }
-//             case 2: {
-//                 printf("Введите новое имя: ");
-//                 input_string(contacts[person_index].person.first_name);
-//                 break;
-//             }
-//             case 3: {
-//                 printf("Введите новое отчество: ");
-//                 input_string(contacts[person_index].person.mid_name);
-//                 break;
-//             }
-//             case 4: {
-//                 printf("Введите новое место работы: ");
-//                 input_string(contacts[person_index].job_place);
-//                 break;
-//             }
-//             case 5: {
-//                 printf("Введите новую должность: ");
-//                 input_string(contacts[person_index].job_title);
-//                 break;
-//             }
-//             case 6: {
-//                 int phones_count = print_phones(contacts[person_index].phones);
-//                 if (phones_count == 0) {
-//                     printf("Номеров нет, добавьте новый: ");
-//                     input_string(contacts[person_index].phones[0]);
-//                 } else {
-//                     if (phones_count <= MAX_PHONES) {
-//                         printf("\nВыберите телефон для редактирования (%d - ввести новый): ", phones_count);
-//                     } else {
-//                         printf("\nВыберите телефон для редактирования: ");
-//                     }
-//                     int c;
-//                     scanf("%d", &c);
-//                     if (c >= 1 && c <= phones_count && c <= MAX_PHONES) {
-//                         printf("Введите новый номер телефона: ");
-//                         input_string(contacts[person_index].phones[c - 1]);
-//                         contacts[person_index].phones[phones_count][0] = '\0';
-//                     } else {
-//                         printf("Введен неверный номер!\n");
-//                     }
-//                 }
-//                 break;
-//             }
-//             case 7: {
-//                 int emails_count = print_emails(contacts[person_index].emails);
-//                 if (emails_count == 0) {
-//                     printf("Адресов нет, добавьте новый: ");
-//                     input_string(contacts[person_index].emails[0]);
-//                 } else {
-//                     if (emails_count <= MAX_EMAILS) {
-//                         printf("\nВыберите адрес для редактирования (%d - ввести новый): ", emails_count);
-//                     } else {
-//                         printf("\nВыберите адрес для редактирования: ");
-//                     }
-//                     int c;
-//                     scanf("%d", &c);
-//                     if (c >= 1 && c <= emails_count && c <= MAX_EMAILS) {
-//                         printf("Введите новый адрес почты: ");
-//                         input_string(contacts[person_index].emails[c - 1]);
-//                         contacts[person_index].emails[emails_count][0] = '\0';
-//                     } else {
-//                         printf("Введен неверный номер!\n");
-//                     }
-//                 }
-//                 break;
-//             }
-//             case 8: {
-//                 int accounts_count = print_accounts(contacts[person_index].accounts);
-//                 if (accounts_count == 0) {
-//                     printf("Профилей нет, создайте первый.\nВведите название соцсети: ");
-//                     input_string(contacts[person_index].accounts[0].name);
-//                     printf("Введите ссылку на профиль: ");
-//                     input_string(contacts[person_index].accounts[0].link);
-//                 } else {
-//                     if (accounts_count <= MAX_ACCOUNTS) {
-//                         printf("\nВыберите профиль для редактирования (%d - создать новый): ", accounts_count);
-//                     } else {
-//                         printf("\nВыберите профиль для редактирования: ");
-//                     }
-//                     int c;
-//                     scanf("%d", &c);
-//                     if (c >= 1 && c <= accounts_count && c <= MAX_ACCOUNTS) {
-//                         printf("Введите название соцсети: ");
-//                         input_string(contacts[person_index].accounts[c - 1].name);
-//                         printf("Введите ссылку на профиль: ");
-//                         input_string(contacts[person_index].accounts[c - 1].link);
-//                         contacts[person_index].accounts[accounts_count].name[0] = '\0';
-//                         contacts[person_index].accounts[accounts_count].link[0] = '\0';
-//                     } else {
-//                         printf("Введен неверный номер!\n");
-//                     }
-//                 }
-//                 break;
-//             }
-//             case 0:
-//                 return 0;
-//             default: {
-//                 printf("Неверный пункт!\n");
-//                 break;
-//             }
-//         }
-//         return 0;
-//     } else {
-//         return 1;
-//     }
-// };
+Item* edit_contact(Item* head, int n) {
+    int count_contacts = get_count_contacts(head);
+    if (n < 0 || n >= count_contacts) {
+        printf("Контакта с таким номером не существует\n");
+        return head;
+    }
+    Item *p = head;
+    for (int i = 0; i < n; i++) p = p->next;
+
+    system("clear");
+    printf("Что вы хотите изменить?\n1. Фамилию\n2. Имя\n3. Отчество\n4. Место работы\n5. Должность\n6. Телефон\n7. Почту\n8. Профиль в соцсети\n0. Назад\n");
+    int c;
+    scanf(" %d", &c);
+    system("clear");
+    switch (c) {
+        case 1: {
+            printf("Введите новую фамилию: ");
+            input_string(p->contact.person.last_name);
+            return sort_contacts(head);
+        }
+        case 2: {
+            printf("Введите новое имя: ");
+            input_string(p->contact.person.first_name);
+            break;
+        }
+        case 3: {
+            printf("Введите новое отчество: ");
+            input_string(p->contact.person.mid_name);
+            break;
+        }
+        case 4: {
+            printf("Введите новое место работы: ");
+            input_string(p->contact.job_place);
+            break;
+        }
+        case 5: {
+            printf("Введите новую должность: ");
+            input_string(p->contact.job_title);
+            break;
+        }
+        case 6: {
+            int phones_count = print_phones(p->contact.phones);
+            if (phones_count == 0) {
+                printf("Номеров нет, добавьте новый: ");
+                input_string(p->contact.phones[0]);
+            } else {
+                if (phones_count <= MAX_PHONES) {
+                    printf("\nВыберите телефон для редактирования (%d - ввести новый): ", phones_count);
+                } else {
+                    printf("\nВыберите телефон для редактирования: ");
+                }
+                int c;
+                scanf("%d", &c);
+                if (c >= 1 && c <= phones_count && c <= MAX_PHONES) {
+                    printf("Введите новый номер телефона: ");
+                    input_string(p->contact.phones[c - 1]);
+                    p->contact.phones[phones_count][0] = '\0';
+                } else {
+                    printf("Введен неверный номер!\n");
+                }
+            }
+            break;
+        }
+        case 7: {
+            int emails_count = print_emails(p->contact.emails);
+            if (emails_count == 0) {
+                printf("Адресов нет, добавьте новый: ");
+                input_string(p->contact.emails[0]);
+            } else {
+                if (emails_count <= MAX_EMAILS) {
+                    printf("\nВыберите адрес для редактирования (%d - ввести новый): ", emails_count);
+                } else {
+                    printf("\nВыберите адрес для редактирования: ");
+                }
+                int c;
+                scanf("%d", &c);
+                if (c >= 1 && c <= emails_count && c <= MAX_EMAILS) {
+                    printf("Введите новый адрес почты: ");
+                    input_string(p->contact.emails[c - 1]);
+                    p->contact.emails[emails_count][0] = '\0';
+                } else {
+                    printf("Введен неверный номер!\n");
+                }
+            }
+            break;
+        }
+        case 8: {
+            int accounts_count = print_accounts(p->contact.accounts);
+            if (accounts_count == 0) {
+                printf("Профилей нет, создайте первый.\nВведите название соцсети: ");
+                input_string(p->contact.accounts[0].name);
+                printf("Введите ссылку на профиль: ");
+                input_string(p->contact.accounts[0].link);
+            } else {
+                if (accounts_count <= MAX_ACCOUNTS) {
+                    printf("\nВыберите профиль для редактирования (%d - создать новый): ", accounts_count);
+                } else {
+                    printf("\nВыберите профиль для редактирования: ");
+                }
+                int c;
+                scanf("%d", &c);
+                if (c >= 1 && c <= accounts_count && c <= MAX_ACCOUNTS) {
+                    printf("Введите название соцсети: ");
+                    input_string(p->contact.accounts[c - 1].name);
+                    printf("Введите ссылку на профиль: ");
+                    input_string(p->contact.accounts[c - 1].link);
+                    p->contact.accounts[accounts_count].name[0] = '\0';
+                    p->contact.accounts[accounts_count].link[0] = '\0';
+                } else {
+                    printf("Введен неверный номер!\n");
+                }
+            }
+            break;
+        }
+        case 0:
+            return head;
+        default: {
+            printf("Неверный пункт!\n");
+            break;
+        }
+    }
+    return head;
+};
 
 void input_person(Person *new_person) {
     printf("Введите фамилию (обязательно): ");
@@ -327,43 +384,4 @@ int print_accounts(SocialAccount accounts[MAX_ACCOUNTS]) {
         printf("%d) %s - %s. ", j + 1, accounts[j].name, accounts[j].link);
     }
     return j + 1;
-}
-
-Item* insert(Item* head, Contact contact) {
-    Item* item = malloc(sizeof(Item));
-    item->contact = contact;
-    if (head == NULL) {
-        return item;
-    }
-    Item* right = find_pointer(head, contact);
-    if (right == NULL) {
-        Item* last = head;
-        while (last->next != NULL) {
-            last = last->next;
-        }
-        last->next = item;
-        item->prev = last;
-    } else if (right->prev == NULL) {
-        item->next = right;
-        right->prev = item;
-        head = item;
-    } else {
-        Item* left = right->prev;
-        left->next = item;
-        item->prev = left;
-        item->next = right;
-        right->prev = item;
-    }
-    return head;
-}
-
-Item* find_pointer(Item* head, Contact contact) {
-    Item* p = head;
-    while (p != NULL) {
-        if (strcmp(p->contact.person.last_name, contact.person.last_name) >= 0) {
-            break;
-        }
-        p = p->next;
-    }
-    return p;
 }

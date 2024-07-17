@@ -35,7 +35,11 @@ typedef struct Node {
 
 Item* add_contact(Item *head);
 Item* del_contact(Item *head, int n);
-// int edit_contact(Item *head);
+Item* edit_contact(Item *head, int n);
+
+Item* insert(Item* head, Contact contact);
+Item* find_pointer(Item* head, Contact contact);
+Item* sort_contacts(Item* head);
 
 void clear_contact(Contact *contact);
 
@@ -54,8 +58,5 @@ void print_list(Item *head);
 int print_phones(char phones[MAX_PHONES][MAX_SYMBOLS]);
 int print_emails(char emails[MAX_EMAILS][MAX_SYMBOLS]);
 int print_accounts(SocialAccount accounts[MAX_ACCOUNTS]);
-
-Item* insert(Item* head, Contact contact);
-Item* find_pointer(Item* head, Contact contact);
 
 #endif
