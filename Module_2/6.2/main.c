@@ -26,10 +26,9 @@ int main() {
     int (*print_accounts)(SocialAccount[MAX_ACCOUNTS]);
 
     void* lib = dlopen("./libsource.so", RTLD_LAZY);
-    char *error;
-    if (error = dlerror()) {
-        printf("dlopen: %s\n",error);
-        exit(1);
+    if (!lib) {
+        fprintf(stderr, "Error: %s\n", dlerror());
+        exit(EXIT_FAILURE);
     }
 
     add_contact = dlsym(lib, "add_contact");
@@ -75,7 +74,7 @@ int main() {
                 printf("Введите номер контакта: ");
                 int n;
                 scanf("%d", &n);
-                head = del_contact(head, n - 1); // list = 0 => segfault
+                head = del_contact(head, n - 1);
                 break;
             }
             case 4: {
