@@ -6,4 +6,5 @@ program
 *.tar
 *.zip
 *.docx
+*.db
 .vscode
