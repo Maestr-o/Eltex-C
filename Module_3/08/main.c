@@ -50,7 +50,6 @@ int main(int argc, char* argv[]) {
             while (1) {
                 sleep(1);
                 sem_p(sem_d);
-
                 FILE *file = fopen(FILE_NAME, "r");
                 if (file == NULL || access(CHANNEL_PATH, F_OK) != 0) {
                     printf("Завершение дочернего процесса...\n");
@@ -61,9 +60,8 @@ int main(int argc, char* argv[]) {
                     printf("Чтение потомком: %d\n", x);
                 }
                 fclose(file);
-                write(fd_fifo, &x, sizeof(int));
-
                 sem_v(sem_d);
+                write(fd_fifo, &x, sizeof(int));
             }
             exit(EXIT_SUCCESS);
         }
@@ -71,18 +69,16 @@ int main(int argc, char* argv[]) {
             srand(time(NULL));
             for (int i = 0; i < n; i++) {
                 int num = rand() % 100;
-                printf("Сгенерировано родителем: %d\n", num);
 
                 sem_p(sem_d);
-
                 FILE* file = fopen(FILE_NAME, "w");
                 if (file == NULL) {
                     printf("Ошибка открытия выходного файла\n");
                     exit(EXIT_FAILURE);
                 }
                 write_int(num, file);
+                printf("Записано родителем в файл: %d\n", num);
                 fclose(file);
-
                 sem_v(sem_d);
 
                 int received;
