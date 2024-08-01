@@ -10,7 +10,7 @@ union semun {
     struct seminfo *__buf;
 };
 
-void sem_write(int semid);
+int sem_write(int semid);
 void sem_p(int semid);
 void sem_v(int semid);
 

@@ -77,7 +77,9 @@ void parent_process(int fd_fifo, int sem_d, int n) {
     for (int i = 0; i < n; i++) {
         int num = rand() % 100;
 
-        sem_write(sem_d);
+        while (sem_write(sem_d) != 0) {
+            sleep(1);
+        }
         FILE* file = fopen(FILE_NAME, "w");
         if (file == NULL) {
             printf("Ошибка открытия выходного файла\n");

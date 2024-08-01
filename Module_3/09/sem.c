@@ -24,9 +24,11 @@ void sem_v(int semid) {
     semop(semid, &sem_op, 1);
 }
 
-void sem_write(int semid) {
+int sem_write(int semid) {
     int sem_val = semctl(semid, 0, GETVAL);
     if (sem_val >= SEM_MAX) {
         sem_p(semid);
+        return 0;
     }
+    return 1;
 }
