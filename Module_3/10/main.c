@@ -17,6 +17,7 @@ void write_int(int x, FILE* file);
 int main(int argc, char* argv[]) {
     unlink(CHANNEL_PATH);
     sem_unlink(SEM_NAME);
+    remove(FILE_NAME);
 
     if (argc != 2) {
         printf("Программа принимает 1 аргумент - кол-во чисел!\n");
@@ -33,6 +34,7 @@ int main(int argc, char* argv[]) {
         printf("Ошибка открытия канала\n");
         exit(EXIT_FAILURE);
     }
+    fclose(fopen(FILE_NAME, "w"));
 
     sem_create();
     pid_t pid;
@@ -42,12 +44,12 @@ int main(int argc, char* argv[]) {
             exit(EXIT_FAILURE);
         }
         case 0: {
-            while (1) {
+            for (int i = 0; i < n; i++) {
+                int num = rand() % 100;
+                write(fd_fifo, &num, sizeof(int));
+                
                 sleep(1);
-                if (access(CHANNEL_PATH, F_OK) != 0) {
-                    printf("Завершение дочернего процесса...\n");
-                    exit(EXIT_SUCCESS);
-                }
+
                 sem_p();
                 FILE *file = fopen(FILE_NAME, "r");
                 if (file == NULL) {
@@ -59,15 +61,22 @@ int main(int argc, char* argv[]) {
                     printf("Чтение потомком: %d\n", x);
                 }
                 fclose(file);
-                write(fd_fifo, &x, sizeof(int));
                 sem_v();
             }
+            remove(FILE_NAME);
+            close(fd_fifo);
+            sem_unlink(SEM_NAME);
+            unlink(CHANNEL_PATH);
+            printf("Завершение дочернего процесса...\n");
             exit(EXIT_SUCCESS);
         }
         default: {
             srand(time(NULL));
-            for (int i = 0; i < n; i++) {
-                int num = rand() % 100;
+            int i = 0;
+            while (i < n) {
+                int num;
+                read(fd_fifo, &num, sizeof(int));
+
                 sem_p();
                 FILE* file = fopen(FILE_NAME, "w");
                 if (file == NULL) {
@@ -78,11 +87,9 @@ int main(int argc, char* argv[]) {
                 printf("Записано родителем: %d\n", num);
                 fclose(file);
                 sem_v();
-                sleep(2);
+                i++;
             }
-            close(fd_fifo);
-            sem_unlink(SEM_NAME);
-            unlink(CHANNEL_PATH);
+            printf("Завершение родительского процесса...\n");
             exit(EXIT_SUCCESS);
         }
     }
