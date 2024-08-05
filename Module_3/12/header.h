@@ -27,6 +27,8 @@ void sem_p(int sem_id);
 void sem_v(int sem_id);
 
 void init_shm();
+SharedData* get_data();
+
 void child_process(int sem_id);
 void parent_process(int sem_id);
 

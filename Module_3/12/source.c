@@ -54,30 +54,34 @@ void init_shm() {
 
 void child_process(int sem_id) {
     int sval = semctl(sem_id, 0, GETVAL);
-    if (sval == 1) {
-        key_t shm_key = ftok(SHM_FILE, KEY_SHM);
-        int shm_id = shmget(shm_key, sizeof(SharedData), 0666);
-        if (shm_id == -1) {
-            exit(EXIT_FAILURE);
-        }
-        SharedData* shmaddr = (SharedData*)shmat(shm_id, NULL, 0);
-        int max = shmaddr->arr[0], min = shmaddr->arr[0];
-        for (int i = 1; i < shmaddr->count; i++) {
-            if (shmaddr->arr[i] < min) {
-                min = shmaddr->arr[i];
-            } else if (shmaddr->arr[i] > max) {
-                max = shmaddr->arr[i];
+    switch (sval) {
+        case -1:
+            exit(EXIT_SUCCESS);
+        case 1: {
+            SharedData* shmaddr = get_data();
+            int max = shmaddr->arr[0], min = shmaddr->arr[0];
+            for (int i = 1; i < shmaddr->count; i++) {
+                if (shmaddr->arr[i] < min) {
+                    min = shmaddr->arr[i];
+                } else if (shmaddr->arr[i] > max) {
+                    max = shmaddr->arr[i];
+                }
             }
+            shmaddr->min = min;
+            shmaddr->max = max;
+            sem_v(sem_id);
+            break;
         }
-        shmaddr->min = min;
-        shmaddr->max = max;
-        sem_v(sem_id);
+        default:
+            break;
     }
 }
 
 void parent_process(int sem_id) {
     int sval = semctl(sem_id, 0, GETVAL);
     switch (sval) {
+        case -1:
+            exit(EXIT_SUCCESS);
         case 0: {
             srand(time(NULL));
             int n = rand() % 10 + 1;
@@ -85,15 +89,9 @@ void parent_process(int sem_id) {
             int* set = (int*)malloc(shm_size);
             for (int i = 0; i < n; i++) {
                 set[i] = rand() % 100;
-                printf("%d | ", set[i]);
             }
 
-            key_t shm_key = ftok(SHM_FILE, KEY_SHM);
-            int shm_id = shmget(shm_key, sizeof(SharedData), 0666);
-            if (shm_id == -1) {
-                exit(EXIT_FAILURE);
-            }
-            SharedData* shmaddr = (SharedData*)shmat(shm_id, NULL, 0);
+            SharedData* shmaddr = get_data();
             shmaddr->count = n;
             for (int i = 0; i < n; i++) {
                 shmaddr->arr[i] = set[i];
@@ -103,12 +101,7 @@ void parent_process(int sem_id) {
             break;
         }
         case 2: {
-            key_t shm_key = ftok(SHM_FILE, KEY_SHM);
-            int shm_id = shmget(shm_key, sizeof(SharedData), 0666);
-            if (shm_id == -1) {
-                exit(EXIT_FAILURE);
-            }
-            SharedData* shmaddr = (SharedData*)shmat(shm_id, NULL, 0);
+            SharedData* shmaddr = get_data();
             printf("Min: %d, max: %d\n", shmaddr->min, shmaddr->max);
             shmaddr->done++;
             sem_p(sem_id);
@@ -120,17 +113,30 @@ void parent_process(int sem_id) {
 }
 
 void quit_parent() {
-    key_t sem_key = ftok(SEM_FILE, KEY_SEM);
     key_t shm_key = ftok(SHM_FILE, KEY_SHM);
     int shm_id = shmget(shm_key, sizeof(SharedData), 0666);
-    SharedData* shmaddr = (SharedData*)shmat(shm_id, NULL, 0);
+    if (shm_id == -1) {
+        exit(EXIT_FAILURE);
+    }
+    SharedData* shmaddr = shmat(shm_id, NULL, 0);
     printf("\nКол-во обработанных наборов: %d\n", shmaddr->done);
     shmdt(shmaddr);
     shmctl(shm_id, IPC_RMID, NULL);
-    semctl(sem_key, 0, IPC_RMID);
     printf("Завершение родительского процесса...\n");
 }
 
 void quit_child() {
+    key_t sem_key = ftok(SEM_FILE, KEY_SEM);
+    int sem_id = semget(sem_key, 1, 0666);
+    semctl(sem_id, 0, IPC_RMID);
     printf("Завершение дочернего процесса...\n");
+}
+
+SharedData* get_data() {
+    key_t shm_key = ftok(SHM_FILE, KEY_SHM);
+    int shm_id = shmget(shm_key, sizeof(SharedData), 0666);
+    if (shm_id == -1) {
+        exit(EXIT_FAILURE);
+    }
+    return (SharedData*)shmat(shm_id, NULL, 0);
 }
