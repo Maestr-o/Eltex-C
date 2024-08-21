@@ -13,3 +13,9 @@ server
 *.db
 .vscode
 .bin
+*.cmd
+*.ko
+*.mod
+*.symvers
+*.order
+*.mod.c
